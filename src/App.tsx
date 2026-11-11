@@ -24,6 +24,7 @@ export default function App(){
  const [session,setSession]=useState<any>(null),[profile,setProfile]=useState<Profile|null>(null),[email,setEmail]=useState(''),[password,setPassword]=useState(''),[name,setName]=useState(''),[register,setRegister]=useState(false),[page,setPage]=useState('Overview'),[dark,setDark]=useState(false),[busy,setBusy]=useState(false),[notice,setNotice]=useState(''),[stats,setStats]=useState({volume:0,running:0}),[statsError,setStatsError]=useState(''),[accounts,setAccounts]=useState<any[]>([]),[accountStatusBusyId,setAccountStatusBusyId]=useState(''),[accountStatusError,setAccountStatusError]=useState(''),[inboxUnread,setInboxUnread]=useState(0);
  const [showSubmissionSuccess,setShowSubmissionSuccess]=useState(false);
  useEffect(()=>{supabase.auth.getSession().then(({data})=>setSession(data.session));const {data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>setSession(s));return()=>subscription.unsubscribe()},[]);
+ useEffect(()=>{if(showSubmissionSuccess)console.info('[Account submission] Popup visibility state changed to true')},[showSubmissionSuccess]);
  useEffect(()=>{if(session)loadProfile()},[session]);
  useEffect(()=>{
   if(profile?.approval_status!=='active')return;
@@ -49,6 +50,11 @@ export default function App(){
   if(error){setAccountStatusError(error.message);return}
   setAccounts(current=>current.map(account=>account.id===data.id?{...account,status:data.status}:account));
  }
+ function handleAccountSubmissionComplete(){
+  setShowSubmissionSuccess(true);
+  setPage('Submitted Accounts');
+  void loadAccounts();
+ }
  async function auth(){setBusy(true);setNotice('');const result=register?await supabase.auth.signUp({email,password,options:{data:{full_name:name}}}):await supabase.auth.signInWithPassword({email,password});setBusy(false);if(result.error)setNotice(result.error.message);else if(register)setNotice('Registration submitted. Your account will remain waiting for employee approval. Check your email if confirmation is enabled.')}
  async function signout(){const {error}=await supabase.auth.signOut();if(error){setNotice(error.message);return}setProfile(null);setSession(null);setPassword('')}
  if(!session)return <main className="auth-wrap"><section className="auth-card"><div className="brand"><span className="brand-icon"><Building2/></span><div><b>Company Portal</b><small>Secure account management</small></div></div><h1>{register?'Create your account':'Welcome back'}</h1><p className="muted">{register?'Register to request access. An employee must approve your account.':'Sign in with your company portal credentials.'}</p>{register&&<label>Full name<input value={name} onChange={e=>setName(e.target.value)} placeholder="Your full name"/></label>}<label>Email address<input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="name@example.com"/></label><label>Password<input type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Enter password"/></label>{notice&&<div className="notice">{notice}</div>}<button className="primary full" disabled={busy||!email||!password} onClick={auth}>{busy?'Please wait…':register?'Create account':'Sign in'}</button><p className="switch">{register?'Already registered?':'Need an account?'} <button className="text-btn" onClick={()=>{setRegister(!register);setNotice('')}}>{register?'Sign in':'Register'}</button></p></section></main>;
@@ -65,7 +71,7 @@ export default function App(){
   <main className="main">
    <header className="topbar"><div><div className="eyebrow">COMPANY WORKSPACE</div><h2>{page}</h2></div><div className="topbar-actions"><div className="user-chip"><span className="avatar">{(profile.full_name||email).slice(0,1).toUpperCase()}</span><div><b>{profile.full_name||email}</b><small>{profile.role.replace('_',' ')}</small></div></div><button className="logout-button" onClick={signout}><LogOut size={16}/> Logout</button></div></header>
  {page==='Overview'&&<><div className="welcome"><div><h1>Good day, {profile.full_name||'there'}</h1><p>Here is your account activity at a glance.</p></div><div className="welcome-actions">{profile.role==='user'&&<a className="telegram-contact" href="https://t.me/Ghostruepayin" target="_blank" rel="noopener noreferrer" aria-label="Contact us on Telegram"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#229ED9"/><path fill="#fff" d="M19.2 6.4 16.8 17.8c-.2.8-.7 1-1.4.6l-3.8-2.8-1.8 1.7c-.2.2-.4.4-.8.4l.3-3.9 7.1-6.4c.3-.3-.1-.4-.5-.2L7.1 12.7l-3.7-1.2c-.8-.2-.8-.8.2-1.2l14.4-5.6c.7-.3 1.4.2 1.2 1.7Z"/></svg>Contact on Telegram</a>}<button className="secondary" onClick={()=>{loadStats();loadAccounts()}}><RefreshCw size={16}/> Refresh</button></div></div><div className="stats"><article className="stat"><span>Company total volume</span><strong>₹{stats.volume.toLocaleString('en-IN')}</strong><small>INR</small></article><article className="stat"><span>Running accounts</span><strong>{stats.running.toLocaleString()}</strong><small>Company total</small></article><article className="stat"><span>Your submitted accounts</span><strong>{accounts.length}</strong><small>All submissions</small></article></div><div className="panel"><div className="panel-head"><div><h3>Quick actions</h3><p>Manage your account and requests.</p></div></div><div className="quick-grid">{['Submit Account','Submitted Accounts','Running Accounts','Payment Methods','Deposits','Withdrawals'].map((x,i)=><button className="quick" onClick={()=>setPage(x)} key={x}><span>{[<PlusCircle/>,<FileText/>,<Building2/>,<Wallet/>,<ArrowDownToLine/>,<ArrowUpFromLine/>][i]}</span><b>{x}</b><small>Open section →</small></button>)}</div></div></>}
- {page==='Submit Account'&&<SubmitAccount onDone={()=>{loadAccounts();setPage('Submitted Accounts');if(profile.role==='user')setShowSubmissionSuccess(true)}}/>}
+ {page==='Submit Account'&&<SubmitAccount onDone={handleAccountSubmissionComplete}/>}
  {page==='Submitted Accounts'&&<div className="panel"><h3>Submitted account information</h3><p className="muted">Your submitted records and their current status.</p>{accountStatusError&&<div className="notice" role="alert">{accountStatusError}</div>}<div className="table-wrap"><table><thead><tr><th>Bank</th><th>Account type</th><th>IFSC</th><th>Account number</th><th>Status</th><th>Employee notes</th></tr></thead><tbody>{accounts.map(a=><tr key={a.id}><td>{a.bank_name||'—'}</td><td>{a.account_type||'—'}</td><td>{a.ifsc_code||'—'}</td><td>{a.account_number||'—'}</td><td>{isStaff?<label className="submission-status-control"><span className="badge">{accountSubmissionStatuses.find(status=>status.value===a.status)?.label||a.status}</span><select aria-label={`Update status for ${a.bank_name||'account submission'}`} className="submission-status-select" value={a.status} disabled={accountStatusBusyId===a.id} onChange={event=>{const selected=accountSubmissionStatuses.find(status=>status.value===event.currentTarget.value);if(selected)void updateAccountStatus(a.id,selected.value)}}>{accountSubmissionStatuses.map(status=><option key={status.value} value={status.value}>{status.label}</option>)}</select>{accountStatusBusyId===a.id&&<small>Saving…</small>}</label>:<span className="badge">{accountSubmissionStatuses.find(status=>status.value===a.status)?.label||a.status}</span>}</td><td>{a.employee_notes||'—'}</td></tr>)}</tbody></table>{!accounts.length&&<p className="empty">No submitted accounts yet.</p>}</div></div>}
  {page==='Running Accounts'&&<div className="panel empty-state"><Building2 size={36}/><h3>YOU HAVE NO LIVE RUNNING ACCOUNTS YET!</h3><p>Approved running accounts will appear here.</p></div>}
  {page==='User Management'&&isStaff&&<UserManagement isSuperAdmin={profile.role==='super_admin'}/>}
@@ -75,7 +81,7 @@ export default function App(){
  {page==='Company Settings'&&<CompanySettings stats={stats} statsError={statsError} isSuperAdmin={profile.role==='super_admin'} onSaved={()=>void loadStats()}/>}
  {(profile.role==='user'||profile.role==='super_admin')&&<CompanyInbox userId={profile.id} role={profile.role} active={page==='Inbox'} onUnreadChange={setInboxUnread}/>}
  </main>
- {showSubmissionSuccess&&<div className="account-success-overlay"><section className="account-success-dialog" role="dialog" aria-modal="true" aria-labelledby="account-success-title" aria-describedby="account-success-message"><h2 id="account-success-title">Account Submitted Successfully!</h2><p id="account-success-message">Your account submission has been received. To get your account running, please make a deposit.</p><div className="account-success-actions"><button className="primary" onClick={()=>{setShowSubmissionSuccess(false);setPage('Deposits')}}>MAKE DEPOSIT</button><button className="secondary" onClick={()=>setShowSubmissionSuccess(false)}>I ALREADY PAID THE DEPOSIT</button></div></section></div>}
+ {showSubmissionSuccess&&<AccountSubmissionSuccessPopup onMakeDeposit={()=>{setShowSubmissionSuccess(false);setPage('Deposits')}} onDismiss={()=>setShowSubmissionSuccess(false)}/>}
  </div>
 }
 function SubmitAccount({onDone}:{onDone:()=>void}){
@@ -89,7 +95,7 @@ function SubmitAccount({onDone}:{onDone:()=>void}){
   const {data:{user},error:userError}=await supabase.auth.getUser();
   if(userError||!user){
    setBusy(false);
-   setMsg(userError?.message||'Your session is unavailable. Please sign in again.');
+   setMsg(`Submission failed: ${userError?.message||'Your session is unavailable. Please sign in again.'}`);
    return;
   }
   let mqr_path:string|null=null;
@@ -97,13 +103,18 @@ function SubmitAccount({onDone}:{onDone:()=>void}){
    const ext=file.name.split('.').pop()||'bin';
    const path=`${user.id}/${crypto.randomUUID()}.${ext}`;
    const up=await supabase.storage.from('account-documents').upload(path,file);
-   if(up.error){setBusy(false);setMsg(up.error.message);return}
+   if(up.error){setBusy(false);setMsg(`Submission failed: ${up.error.message}`);return}
    mqr_path=path;
   }
+  console.info('[Account submission] Supabase account insert started');
   const {error}=await supabase.from('account_submissions').insert({...form,user_id:user.id,mqr_path});
   setBusy(false);
-  if(error)setMsg(error.message);
-  else onDone();
+  if(error){console.error('[Account submission] Supabase account insert failed',error);setMsg(`Submission failed: ${error.message}`)}
+  else{console.info('[Account submission] Supabase account insert succeeded');onDone()}
  }
- return <form className="panel form-panel" onSubmit={submit}><h3>Submit account</h3><p className="muted">Enter the available details. All fields are optional.</p><div className="form-grid">{fields.map((f,i)=><label key={f}>{labels[i]}<input value={form[f]||''} onChange={e=>setForm({...form,[f]:e.target.value})} /></label>)}</div><label>MQR file<input type="file" accept="image/*,.pdf" onChange={e=>setFile(e.target.files?.[0]||null)}/></label><p className="muted tiny">Do not enter or upload internet-banking passwords, transaction passwords, OTPs, PINs, or security answers.</p>{msg&&<div className="notice">{msg}</div>}<button className="primary" disabled={busy}>{busy?'Submitting…':'Submit account'}</button></form>
+ return <form className="panel form-panel" onSubmit={submit}><h3>Submit account</h3><p className="muted">Enter the available details. All fields are optional.</p><div className="form-grid">{fields.map((f,i)=><label key={f}>{labels[i]}<input value={form[f]||''} onChange={e=>setForm({...form,[f]:e.target.value})} /></label>)}</div><label>MQR file<input type="file" accept="image/*,.pdf" onChange={e=>setFile(e.target.files?.[0]||null)}/></label><p className="muted tiny">Do not enter or upload internet-banking passwords, transaction passwords, OTPs, PINs, or security answers.</p>{msg&&<div className="submission-error" role="alert">{msg}</div>}<button className="primary" disabled={busy} onClick={()=>console.info('[Account submission] Submit button clicked')}>{busy?'Submitting…':'Submit account'}</button></form>
+}
+function AccountSubmissionSuccessPopup({onMakeDeposit,onDismiss}:{onMakeDeposit:()=>void;onDismiss:()=>void}){
+ useEffect(()=>{console.info('[Account submission] Success popup component rendered')},[]);
+ return <div className="account-success-overlay"><section className="account-success-dialog" role="dialog" aria-modal="true" aria-labelledby="account-success-title" aria-describedby="account-success-message"><h2 id="account-success-title">Account Submitted Successfully!</h2><p id="account-success-message">Your account submission has been received. To get your account running, please make a deposit.</p><div className="account-success-actions"><button className="primary" onClick={onMakeDeposit}>MAKE DEPOSIT</button><button className="secondary" onClick={onDismiss}>I ALREADY PAID THE DEPOSIT</button></div></section></div>
 }
