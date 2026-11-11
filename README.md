@@ -11,6 +11,7 @@
 - Searchable staff user management with approval and access controls
 - Edge Function-based account creation, private employee notes, and protected profile status updates
 - Shared Super Admin-managed USDT TRC20 deposit details and QR code
+- Private payment-proof uploads with pending employee/Super Admin verification
 - Owner-only USDT/INR balances with Super Admin-only manual updates
 - Owner-managed INR bank accounts and USDT wallets, with read-only staff access
 - Balance-reserved withdrawal requests with atomic staff payout processing
@@ -35,6 +36,8 @@ The Withdrawal Requests module uses `20261110163000_withdrawal_requests.sql` (ap
 The Company Settings dashboard uses `20261110164000_company_dashboard_settings.sql` after the withdrawal migration, or the updated `supabase/schema.sql` for a new project. Apply the migration in the Supabase SQL Editor to add non-negative setting constraints and the shared two-second volume tick. Then deploy the updated Edge Function with `supabase functions deploy user-management`; only an active Super Admin can save the volume starting value or running-account count.
 
 The private Messages / Inbox uses `20261110170000_private_messaging_inbox.sql` after the company settings migration, or the updated `supabase/schema.sql` for a new project. Run the migration in the Supabase SQL Editor. It creates private one-to-one conversations, message RLS, sender-verified database functions, unread tracking, and Realtime publication membership. No Edge Function deployment is needed.
+
+Deposit payment proofs use `20261111100000_deposit_payment_proofs.sql` after the earlier migrations, or the updated `supabase/schema.sql` for a new project. It keeps the existing `account-documents` bucket private, stores screenshots under each user's own folder, and records submissions as pending. Staff verification changes only the proof status; it does not change balances. The deposit QR is served through the authenticated Storage download API, with access limited by the existing Storage RLS policy to the QR path saved in `company_settings`. A dedicated QR revision timestamp refreshes the image after replacement without exposing the private bucket.
 
 Active employees can create regular user accounts with an initial password; the password is sent only to the authenticated Edge Function and is never returned in user lists or stored in the profiles table. Share initial passwords with users through a secure channel. Regular users remain pending until approved. Only an active super admin can create employee accounts; employee accounts are activated on creation. All employee notes are stored separately and are available only through the protected Edge Function.
 

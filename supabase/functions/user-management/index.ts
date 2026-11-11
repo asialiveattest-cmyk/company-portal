@@ -246,7 +246,12 @@ Deno.serve(async (request: Request): Promise<Response> => {
     if (!/^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(depositAddress)) {
       return json({ error: 'Enter a valid USDT TRC20 address.' }, 400);
     }
-    const settings: { deposit_usdt_address: string; updated_at: string; deposit_qr_path?: string | null } = {
+    const settings: {
+      deposit_usdt_address: string;
+      updated_at: string;
+      deposit_qr_path?: string | null;
+      deposit_qr_updated_at?: string;
+    } = {
       deposit_usdt_address: depositAddress,
       updated_at: new Date().toISOString(),
     };
@@ -255,6 +260,7 @@ Deno.serve(async (request: Request): Promise<Response> => {
         return json({ error: 'Invalid deposit QR path.' }, 400);
       }
       settings.deposit_qr_path = payload.depositQrPath;
+      settings.deposit_qr_updated_at = new Date().toISOString();
     }
     const { data, error: updateError } = await admin.from('company_settings')
       .update(settings)

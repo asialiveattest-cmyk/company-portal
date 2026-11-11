@@ -1,3 +1,79 @@
-.deposit-management{max-width:1160px;margin:28px auto 0}.deposit-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:20px}.deposit-heading h1{font:800 24px Manrope,sans-serif;margin:7px 0 5px;color:#172033}.deposit-heading p{margin:0;color:#8290a5;font-size:13px}.deposit-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,.8fr);gap:18px}.deposit-card{background:#fff;border:1px solid #e8ecf2;border-radius:12px;padding:22px;box-shadow:0 3px 12px #1d355708}.deposit-card h2{font:700 16px Manrope,sans-serif;margin:0 0 7px;color:#172033}.deposit-card>.muted{margin:0 0 18px}.deposit-form label{display:block;margin:15px 0;color:#48556b;font-size:12px;font-weight:600}.deposit-form input:not([type=file]){display:block;width:100%;margin-top:7px;border:1px solid #dfe5ee;border-radius:7px;padding:11px;font:13px 'DM Sans',sans-serif;color:#172033}.deposit-form input[type=file]{display:block;margin-top:8px;font:12px 'DM Sans',sans-serif;max-width:100%}.deposit-form .primary{margin-top:12px}.deposit-address{padding:13px;background:#f7f9fc;border:1px solid #e8ecf2;border-radius:7px;color:#27344b;font:600 13px 'DM Sans',sans-serif;overflow-wrap:anywhere;min-height:44px}.deposit-qr{margin:18px 0 0;text-align:center}.deposit-qr img{display:block;width:min(100%,280px);max-height:300px;object-fit:contain;margin:0 auto;border:1px solid #e8ecf2;border-radius:8px;padding:8px;background:#fff}.deposit-qr figcaption{margin-top:8px;color:#8290a5;font-size:11px}.deposit-file{margin:9px 0;color:#8290a5;font-size:11px}.deposit-message{margin:0 0 14px;padding:11px 13px;border-radius:7px;font-size:12px}.deposit-message.error{background:#fff0ef;color:#a9423d}.deposit-message.success{background:#eaf7ef;color:#237847}.balance-card{position:relative}.balance-icon{display:grid;place-items:center;width:38px;height:38px;margin-bottom:16px;border-radius:10px;background:#eaf0ff;color:#315fcb}.balance-list{margin:18px 0 0}.balance-list div{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0;border-top:1px solid #edf0f4}.balance-list dt{color:#8290a5;font-size:12px}.balance-list dd{margin:0;color:#27344b;font:700 16px Manrope,sans-serif;text-align:right}.dark .deposit-heading h1,.dark .deposit-card h2,.dark .balance-list dd{color:#e7edf8}.dark .deposit-heading p,.dark .deposit-card>.muted,.dark .balance-list dt{color:#aab7ca}.dark .deposit-card{background:#1b2638;border-color:#2c3a50}.dark .deposit-address{background:#202d42;border-color:#39475e;color:#e7edf8}.dark .deposit-form label{color:#c3cee0}.dark .deposit-form input:not([type=file]){background:#172235;border-color:#39475e;color:#e7edf8}.dark .balance-list div{border-color:#2c3a50}.dark .deposit-qr img{background:#fff}
-@media(max-width:760px){.deposit-grid{grid-template-columns:1fr}.deposit-heading{align-items:flex-start}.deposit-heading h1{font-size:21px}}
-@media(max-width:480px){.deposit-management{margin-top:20px}.deposit-heading{flex-direction:column}.deposit-heading .secondary{align-self:flex-end}.deposit-card{padding:18px}}
+.deposit-management{max-width:1160px;margin:28px auto 0}
+.deposit-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:20px}
+.deposit-heading h1{font:800 24px Manrope,sans-serif;margin:7px 0 5px;color:#172033}
+.deposit-heading p{margin:0;color:#8290a5;font-size:13px}
+.deposit-heading .secondary{white-space:nowrap}
+.deposit-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;gap:18px}
+.deposit-card,.deposit-instructions,.deposit-proof-item,.deposit-proof-empty,.deposit-admin-note{background:#fff;border:1px solid #e8ecf2;border-radius:12px;padding:22px;box-shadow:0 3px 12px #1d355708}
+.deposit-card h2,.deposit-instructions h2,.deposit-list-heading h2,.deposit-admin-note h2{font:700 16px Manrope,sans-serif;margin:0 0 7px;color:#172033}
+.deposit-card>.muted,.deposit-list-heading .muted{margin:0 0 18px}
+.deposit-section-heading{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.deposit-section-heading h2{margin:0}
+.deposit-section-heading p{margin:4px 0 0;color:#8290a5;font-size:12px}
+.deposit-method-icon{display:grid;place-items:center;flex:0 0 42px;height:42px;border-radius:11px;background:#eaf0ff;color:#315fcb}
+.deposit-field-label{margin:0 0 8px;color:#48556b;font-size:12px;font-weight:700}
+.deposit-address{padding:14px;background:#f7f9fc;border:1px solid #e8ecf2;border-radius:8px;color:#27344b;font:600 14px 'DM Sans',sans-serif;overflow-wrap:anywhere;min-height:48px}
+.deposit-action{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;min-height:48px;margin-top:12px;font-weight:700}
+.deposit-qr{margin:22px 0 0;text-align:center}
+.deposit-qr img{display:block;width:min(100%,360px);height:360px;object-fit:contain;margin:0 auto;border:1px solid #e8ecf2;border-radius:10px;padding:10px;background:#fff}
+.deposit-qr figcaption{margin-top:10px;color:#8290a5;font-size:12px}
+.deposit-qr-empty{display:grid;place-items:center;min-height:160px;margin-top:18px;padding:20px;border:1px dashed #dfe5ee;border-radius:9px;color:#8290a5;text-align:center;font-size:13px}
+.deposit-confirm{margin-top:18px;padding-top:16px;border-top:1px solid #edf0f4}
+.deposit-confirm p{margin:0;color:#48556b;font-size:12px;font-weight:600}
+.deposit-form label{display:block;margin:15px 0;color:#48556b;font-size:12px;font-weight:600}
+.deposit-form input:not([type=file]){display:block;width:100%;margin-top:7px;border:1px solid #dfe5ee;border-radius:7px;padding:11px;font:13px 'DM Sans',sans-serif;color:#172033}
+.deposit-form input[type=file]{display:block;margin-top:8px;font:12px 'DM Sans',sans-serif;max-width:100%}
+.deposit-form .primary{margin-top:12px}
+.deposit-file{margin:9px 0;color:#8290a5;font-size:11px;overflow-wrap:anywhere}
+.deposit-message{margin:0 0 14px;padding:12px 14px;border-radius:8px;font-size:13px}
+.deposit-message.error{background:#fff0ef;color:#a9423d}
+.deposit-message.success{background:#eaf7ef;color:#237847}
+.deposit-locked{margin:16px 0;padding:12px;border:1px solid #f0dfb8;border-radius:8px;background:#fff9eb;color:#855e0a;font-size:12px;line-height:1.55}
+.deposit-proof-card>h2{margin-bottom:7px}
+.deposit-proof-card>.muted{margin-bottom:16px}
+.deposit-proof-card form{margin-top:4px}
+.deposit-preview{margin:16px 0 6px;padding:10px;border:1px solid #e8ecf2;border-radius:9px;background:#f7f9fc}
+.deposit-preview img{display:block;width:100%;max-height:300px;object-fit:contain;border-radius:5px}
+.deposit-progress{margin:14px 0 0;color:#315fcb;font-size:12px}
+.deposit-pending-note{margin:15px 0 0;padding-top:13px;border-top:1px solid #edf0f4;color:#8290a5;font-size:11px;line-height:1.6}
+.deposit-instructions{margin-top:18px}
+.deposit-instructions h2{margin-bottom:14px;letter-spacing:.35px}
+.deposit-instructions ol{display:grid;gap:11px;margin:0;padding-left:22px;color:#48556b;font-size:13px;line-height:1.55}
+.deposit-warning{margin:18px 0 0;padding:13px 15px;border-left:3px solid #d99516;border-radius:5px;background:#fff8e9;color:#895b08;font-size:12px;font-weight:700;line-height:1.55}
+.deposit-proof-list-section{margin-top:24px}
+.deposit-list-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:12px}
+.deposit-list-heading h2{margin:0 0 5px}
+.deposit-list-heading .muted{margin:0;font-size:12px}
+.deposit-proof-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.deposit-proof-item{min-width:0;padding:17px}
+.deposit-proof-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.deposit-proof-heading strong{display:block;margin-bottom:4px;color:#27344b;font:700 13px Manrope,sans-serif}
+.deposit-proof-heading small{display:block;color:#8290a5;font-size:10px}
+.deposit-proof-item>a{display:block}
+.deposit-proof-item>a img{display:block;width:100%;max-height:320px;object-fit:contain;border:1px solid #e8ecf2;border-radius:7px;background:#f7f9fc}
+.deposit-proof-status{display:inline-flex;align-items:center;border-radius:20px;padding:5px 9px;background:#fff4d9;color:#966400;font-size:10px;font-weight:700;text-transform:capitalize;white-space:nowrap}
+.deposit-proof-status.status-verified{background:#eaf7ef;color:#237847}
+.deposit-proof-status.status-rejected{background:#fff0ef;color:#a9423d}
+.deposit-review-actions{display:flex;gap:9px;margin-top:12px}
+.deposit-review-actions button{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 12px;font-size:12px}
+.deposit-proof-empty{padding:28px;text-align:center;color:#8793a6;font-size:13px}
+.deposit-admin-note{margin-top:18px}
+.deposit-admin-note p{margin:0;color:#8290a5;font-size:12px;line-height:1.6}
+.visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.dark .deposit-heading h1,.dark .deposit-card h2,.dark .deposit-instructions h2,.dark .deposit-list-heading h2,.dark .deposit-admin-note h2,.dark .deposit-proof-heading strong{color:#e7edf8}
+.dark .deposit-heading p,.dark .deposit-section-heading p,.dark .deposit-card>.muted,.dark .deposit-list-heading .muted,.dark .deposit-proof-heading small,.dark .deposit-admin-note p{color:#aab7ca}
+.dark .deposit-card,.dark .deposit-instructions,.dark .deposit-proof-item,.dark .deposit-proof-empty,.dark .deposit-admin-note{background:#1b2638;border-color:#2c3a50}
+.dark .deposit-field-label,.dark .deposit-confirm p,.dark .deposit-instructions ol{color:#c3cee0}
+.dark .deposit-method-icon{background:#202d42;color:#8daeff}
+.dark .deposit-address,.dark .deposit-preview{background:#202d42;border-color:#39475e;color:#e7edf8}
+.dark .deposit-qr img{background:#fff}
+.dark .deposit-qr figcaption,.dark .deposit-file,.dark .deposit-pending-note{color:#aab7ca}
+.dark .deposit-confirm,.dark .deposit-pending-note{border-color:#2c3a50}
+.dark .deposit-qr-empty{border-color:#39475e;color:#aab7ca}
+.dark .deposit-locked{border-color:#67552d;background:#332d20;color:#f0d48f}
+.dark .deposit-warning{border-color:#d99516;background:#332d20;color:#f0d48f}
+.dark .deposit-proof-item>a img{border-color:#39475e;background:#202d42}
+.dark .deposit-form label{color:#c3cee0}
+.dark .deposit-form input:not([type=file]){background:#172235;border-color:#39475e;color:#e7edf8}
+@media(max-width:760px){.deposit-grid,.deposit-proof-list{grid-template-columns:1fr}.deposit-heading{align-items:flex-start}.deposit-heading h1{font-size:21px}}
+@media(max-width:520px){.deposit-management{margin-top:20px}.deposit-heading{align-items:flex-start}.deposit-card,.deposit-instructions,.deposit-admin-note{padding:17px}.deposit-qr img{height:min(84vw,340px)}.deposit-review-actions{flex-direction:column}.deposit-review-actions button{width:100%}}

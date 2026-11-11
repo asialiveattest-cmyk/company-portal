@@ -144,6 +144,14 @@ export default function WithdrawalRequests({ userId, isStaff, isSuperAdmin }: {
   const displayedAvailable = balance
     ? Math.max(0, Number(balance[currency]) - reserved).toFixed(currencyDecimals[currency])
     : null;
+  const displayedBalances = balance ? {
+    INR: Math.max(0, Number(balance.INR) - requests
+      .filter((request) => request.currency === 'INR' && ['pending', 'processing'].includes(request.status))
+      .reduce((total, request) => total + Number(request.amount), 0)).toFixed(currencyDecimals.INR),
+    USDT: Math.max(0, Number(balance.USDT) - requests
+      .filter((request) => request.currency === 'USDT' && ['pending', 'processing'].includes(request.status))
+      .reduce((total, request) => total + Number(request.amount), 0)).toFixed(currencyDecimals.USDT),
+  } : null;
 
   useEffect(() => {
     setPaymentMethodId(compatibleMethods.find((method) => method.is_default)?.id || compatibleMethods[0]?.id || '');
@@ -208,11 +216,27 @@ export default function WithdrawalRequests({ userId, isStaff, isSuperAdmin }: {
       {success && <div className="withdrawal-message success" role="status">{success}</div>}
 
       {!isStaff && (
-        <div className="withdrawal-grid">
-          <article className="withdrawal-card withdrawal-form-card">
-            <h2>Submit a withdrawal request</h2>
-            <p className="muted">Pending and processing requests are reserved from your available balance.</p>
-            <form onSubmit={(event) => void submitRequest(event)}>
+        <>
+          <section className="withdrawal-balance-section" aria-label="Available balances">
+            <div className="withdrawal-balance-cards">
+              <article className="withdrawal-balance-card">
+                <span>Available INR</span>
+                <strong>{displayedBalances ? `₹${displayedBalances.INR}` : 'Not set'}</strong>
+                <small>Indian rupees</small>
+              </article>
+              <article className="withdrawal-balance-card">
+                <span>Available USDT</span>
+                <strong>{displayedBalances ? `${displayedBalances.USDT} USDT` : 'Not set'}</strong>
+                <small>USDT balance</small>
+              </article>
+            </div>
+            <p>Pending and processing withdrawal requests are deducted from the available amounts shown above.</p>
+          </section>
+          <div className="withdrawal-grid">
+            <article className="withdrawal-card withdrawal-form-card">
+              <h2>Submit a withdrawal request</h2>
+              <p className="muted">Pending and processing requests are reserved from your available balance.</p>
+              <form onSubmit={(event) => void submitRequest(event)}>
               <label>Currency
                 <select value={currency} onChange={(event) => { setCurrency(event.target.value as Currency); setPaymentMethodId(''); }}>
                   <option value="INR">INR</option>
@@ -250,9 +274,10 @@ export default function WithdrawalRequests({ userId, isStaff, isSuperAdmin }: {
               <button className="primary" type="submit" disabled={busy || !paymentMethodId || !amount || !balance}>
                 <ArrowUpFromLine size={16} /> {busy ? 'Submitting…' : 'Submit request'}
               </button>
-            </form>
-          </article>
-        </div>
+              </form>
+            </article>
+          </div>
+        </>
       )}
 
       <div className="withdrawal-list-heading">
