@@ -16,6 +16,7 @@
 - Owner-managed INR bank accounts and USDT wallets, with read-only staff access
 - Balance-reserved withdrawal requests with atomic staff payout processing
 - Private one-to-one user/Super Admin messaging with unread indicators and realtime updates
+- Private Super Admin-managed Test OTP APK/video delivery and per-account installation completion records
 
 ## Configure
 1. Create `.env` from `.env.example` and fill in the Supabase project URL and publishable key.
@@ -38,6 +39,8 @@ The Company Settings dashboard uses `20261110164000_company_dashboard_settings.s
 The private Messages / Inbox uses `20261110170000_private_messaging_inbox.sql` after the company settings migration, or the updated `supabase/schema.sql` for a new project. Run the migration in the Supabase SQL Editor. It creates private one-to-one conversations, message RLS, sender-verified database functions, unread tracking, and Realtime publication membership. No Edge Function deployment is needed.
 
 Deposit payment proofs use `20261111100000_deposit_payment_proofs.sql` after the earlier migrations, or the updated `supabase/schema.sql` for a new project. It keeps the existing `account-documents` bucket private, stores screenshots under each user's own folder, and records submissions as pending. Staff verification changes only the proof status; it does not change balances. The deposit QR is served through the authenticated Storage download API, with access limited by the existing Storage RLS policy to the QR path saved in `company_settings`. A dedicated QR revision timestamp refreshes the image after replacement without exposing the private bucket.
+
+The Test OTP module uses `20261111110000_test_otp_module.sql` after the deposit payment-proof migration, or the updated `supabase/schema.sql` for a new project. It stores versioned APK/video metadata and per-user/account installation completions in Supabase. Test APKs and instruction videos are uploaded to the existing private `account-documents` bucket with resumable uploads and authenticated signed downloads. Only an active Super Admin can upload or replace assets; employee and user access is read-only. The module records installation completion only and must not collect or forward real SMS OTPs; use a test app with safe test-code verification.
 
 Active employees can create regular user accounts with an initial password; the password is sent only to the authenticated Edge Function and is never returned in user lists or stored in the profiles table. Share initial passwords with users through a secure channel. Regular users remain pending until approved. Only an active super admin can create employee accounts; employee accounts are activated on creation. All employee notes are stored separately and are available only through the protected Edge Function.
 
