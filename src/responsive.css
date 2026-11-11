@@ -1,0 +1,267 @@
+.mobile-menu-button,
+.mobile-nav-backdrop {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  html,
+  body,
+  #root {
+    min-width: 320px;
+    width: 100%;
+  }
+
+  body {
+    overflow-x: hidden;
+  }
+
+  .app {
+    width: 100%;
+    min-width: 0;
+    overflow-x: clip;
+  }
+
+  .sidebar {
+    position: fixed;
+    z-index: 1001;
+    inset: 0 auto 0 0;
+    width: min(280px, 85vw);
+    min-height: 100dvh;
+    padding: 22px 16px;
+    overflow-y: auto;
+    transform: translateX(-105%);
+    transition: transform 180ms ease;
+    box-shadow: 12px 0 32px #101b3233;
+  }
+
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  .side-brand {
+    padding: 0 8px 30px;
+  }
+
+  .side-brand > div,
+  .nav-label {
+    display: block;
+    font-size: inherit;
+  }
+
+  .nav-item,
+  .nav-item.selected {
+    justify-content: flex-start;
+    padding: 12px;
+    font-size: 13px;
+  }
+
+  .mobile-nav-backdrop {
+    display: block;
+    position: fixed;
+    z-index: 1000;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: #101b3270;
+  }
+
+  .main {
+    width: 100%;
+    min-width: 0;
+    margin-left: 0;
+    padding: 0 16px 32px;
+  }
+
+  .topbar {
+    flex-wrap: wrap;
+    min-height: 72px;
+    height: auto;
+    gap: 12px;
+    padding: 12px 0;
+  }
+
+  .topbar-title {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .mobile-menu-button {
+    display: inline-flex;
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #e1e7f0;
+    border-radius: 9px;
+    background: #fff;
+    color: #263650;
+    cursor: pointer;
+  }
+
+  .topbar-title h2 {
+    overflow-wrap: anywhere;
+    font-size: 17px;
+  }
+
+  .topbar-actions {
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  .user-chip {
+    gap: 0;
+  }
+
+  .user-chip > div {
+    display: block;
+    min-width: 0;
+    max-width: 110px;
+  }
+
+  .user-chip b,
+  .user-chip small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .logout-button {
+    min-height: 38px;
+    padding: 0 9px;
+    white-space: nowrap;
+  }
+
+  .welcome {
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .welcome > * {
+    min-width: 0;
+  }
+
+  .stats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .stat,
+  .panel,
+  .quick {
+    min-width: 0;
+    padding: 16px;
+  }
+
+  .quick-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .form-grid,
+  .company-settings-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .form-panel {
+    max-width: 100%;
+  }
+
+  .table-wrap {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table-wrap table {
+    min-width: max-content;
+  }
+
+  input,
+  select,
+  textarea {
+    max-width: 100%;
+  }
+
+  .panel-head,
+  .panel-header,
+  .form-actions,
+  .submission-status-control {
+    flex-wrap: wrap;
+  }
+
+  .panel-head > *,
+  .panel-header > *,
+  .form-actions > * {
+    min-width: 0;
+  }
+
+  .modal,
+  .dialog,
+  [role="dialog"] {
+    max-width: calc(100vw - 24px);
+    max-height: calc(100dvh - 24px);
+    overflow: auto;
+  }
+
+  .dark .mobile-menu-button {
+    border-color: #39475e;
+    background: #1b2638;
+    color: #e7edf8;
+  }
+}
+
+@media (max-width: 420px) {
+  .main {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .topbar {
+    gap: 7px;
+  }
+
+  .topbar-title {
+    gap: 7px;
+  }
+
+  .mobile-menu-button {
+    width: 36px;
+    height: 36px;
+  }
+
+  .topbar-title h2 {
+    font-size: 15px;
+  }
+
+  .eyebrow {
+    font-size: 8px;
+    letter-spacing: 1px;
+  }
+
+  .avatar {
+    width: 32px;
+    height: 32px;
+  }
+
+  .logout-button {
+    gap: 5px;
+    padding: 0 7px;
+    font-size: 11px;
+  }
+
+  .quick-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .stat,
+  .panel {
+    padding: 14px;
+  }
+}
