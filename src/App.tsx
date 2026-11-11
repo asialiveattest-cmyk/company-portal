@@ -52,7 +52,6 @@ export default function App(){
  }
  function handleAccountSubmissionComplete(){
   setShowSubmissionSuccess(true);
-  setPage('Submitted Accounts');
   void loadAccounts();
  }
  async function auth(){setBusy(true);setNotice('');const result=register?await supabase.auth.signUp({email,password,options:{data:{full_name:name}}}):await supabase.auth.signInWithPassword({email,password});setBusy(false);if(result.error)setNotice(result.error.message);else if(register)setNotice('Registration submitted. Your account will remain waiting for employee approval. Check your email if confirmation is enabled.')}
