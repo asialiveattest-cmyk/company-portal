@@ -544,6 +544,7 @@ end; $$;
 create or replace function public.list_company_conversations()
 returns table(conversation_id uuid,user_id uuid,user_name text,last_message text,last_message_at timestamptz,unread_count bigint)
 language plpgsql security definer set search_path='' as $$
+#variable_conflict use_column
 declare
  v_actor_id uuid:=auth.uid();
 begin
