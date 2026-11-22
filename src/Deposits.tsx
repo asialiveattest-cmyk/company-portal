@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { Check, Copy, RefreshCw, Save, ShieldCheck, Upload } from 'lucide-react';
+import { Upload as TusUpload } from 'tus-js-client';
 import { supabase } from './supabase';
 import './deposits.css';
 
@@ -47,6 +48,7 @@ export default function Deposits({ userId, isSuperAdmin, isStaff }: {
   const [uploadUnlocked, setUploadUnlocked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [savingSettings, setSavingSettings] = useState(false);
+  const [qrUploadProgress, setQrUploadProgress] = useState<number | null>(null);
   const [submittingProof, setSubmittingProof] = useState(false);
   const [busyProofId, setBusyProofId] = useState('');
   const [proofProgress, setProofProgress] = useState('');
@@ -281,14 +283,42 @@ export default function Deposits({ userId, isSuperAdmin, isStaff }: {
 
     let uploadedQrPath: string | undefined;
     if (qrFile) {
-      const { error: uploadError } = await supabase.storage.from('account-documents').upload(
-        'company/deposit-qr.png',
-        qrFile,
-        { upsert: true, contentType: 'image/png', cacheControl: '0' },
-      );
-      if (uploadError) {
+      setQrUploadProgress(0);
+      try {
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) throw sessionError;
+        if (!session?.access_token) throw new Error('Your session has expired. Sign in again to upload a QR code.');
+
+        const extension = qrFile.name.split('.').pop()?.toLowerCase() || '';
+        const upload = new TusUpload(qrFile, {
+          endpoint: `${import.meta.env.VITE_SUPABASE_URL.replace(/\/+$/, '')}/storage/v1/upload/resumable`,
+          headers: {
+            authorization: `Bearer ${session.access_token}`,
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            'x-upsert': 'true',
+          },
+          metadata: {
+            bucketName: 'account-documents',
+            objectName: 'company/deposit-qr.png',
+            contentType: imageContentTypes[extension],
+            cacheControl: '0',
+          },
+          chunkSize: 6 * 1024 * 1024,
+          retryDelays: [0, 3000, 5000, 10000, 20000],
+          uploadDataDuringCreation: true,
+          onProgress: (sent, total) => {
+            setQrUploadProgress(total ? Math.floor((sent / total) * 100) : 0);
+          },
+        });
+        await new Promise<void>((resolve, reject) => {
+          upload.options.onError = reject;
+          upload.options.onSuccess = () => resolve();
+          upload.start();
+        });
+      } catch (uploadError) {
         setSavingSettings(false);
-        setError(`QR upload failed: ${uploadError.message}`);
+        setQrUploadProgress(null);
+        setError(`QR upload failed: ${uploadError instanceof Error ? uploadError.message : String(uploadError)}`);
         return;
       }
       uploadedQrPath = 'company/deposit-qr.png';
@@ -301,8 +331,20 @@ export default function Deposits({ userId, isSuperAdmin, isStaff }: {
     if (uploadedQrPath) payload.depositQrPath = uploadedQrPath;
     else if (clearQr) payload.depositQrPath = null;
 
-    const { data, error: invokeError } = await supabase.functions.invoke('user-management', { body: payload });
+    let data: { error?: string } | null = null;
+    let invokeError: Error | null = null;
+    try {
+      const response = await supabase.functions.invoke('user-management', { body: payload });
+      data = response.data;
+      invokeError = response.error;
+    } catch (saveError) {
+      setSavingSettings(false);
+      setQrUploadProgress(null);
+      setError(`Could not save deposit settings: ${saveError instanceof Error ? saveError.message : String(saveError)}`);
+      return;
+    }
     setSavingSettings(false);
+    setQrUploadProgress(null);
     if (invokeError || data?.error) {
       setError(data?.error || invokeError?.message || 'Could not save deposit settings.');
       return;
@@ -317,9 +359,10 @@ export default function Deposits({ userId, isSuperAdmin, isStaff }: {
 
   function chooseQr(file: File | null) {
     setError('');
-    if (file && (file.type !== 'image/png' || file.size > 5 * 1024 * 1024)) {
+    const extension = file?.name.split('.').pop()?.toLowerCase() || '';
+    if (file && (!Object.prototype.hasOwnProperty.call(imageContentTypes, extension) || (file.type && file.type !== imageContentTypes[extension]))) {
       setQrFile(null);
-      setError('Choose a PNG QR code no larger than 5 MB.');
+      setError('Choose a PNG, JPG, JPEG, or WebP QR image.');
       return;
     }
     setQrFile(file);
@@ -356,14 +399,15 @@ export default function Deposits({ userId, isSuperAdmin, isStaff }: {
                   <label>USDT TRC20 address
                     <input required value={addressDraft} onChange={(event) => { setAddressDraft(event.target.value); setAddressDirty(true); }} placeholder="T..." autoComplete="off" />
                   </label>
-                  <label>Deposit QR code (PNG, up to 5 MB)
-                    <input type="file" accept="image/png,.png" onChange={(event) => chooseQr(event.target.files?.[0] || null)} />
+                  <label>Deposit QR code (PNG, JPG, JPEG, or WebP)
+                    <input type="file" accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp" disabled={savingSettings} onChange={(event) => chooseQr(event.target.files?.[0] || null)} />
                   </label>
                   {qrFile && <p className="deposit-file">Selected: {qrFile.name}</p>}
+                  {qrUploadProgress !== null && <p className="deposit-progress" role="status">Uploading QR image… {qrUploadProgress}%</p>}
                   {settings?.deposit_qr_path && <button type="button" className="text-btn" onClick={() => { setClearQr(true); setQrFile(null); }}>Remove current QR code</button>}
                   {clearQr && <p className="deposit-file">QR code will be removed when saved.</p>}
                   <button className="primary deposit-action" type="submit" disabled={savingSettings}>
-                    {savingSettings ? 'Saving…' : <><Save size={16} /> Save deposit settings</>}
+                    {savingSettings ? (qrFile ? 'Uploading and saving…' : 'Saving…') : <><Save size={16} /> Save deposit settings</>}
                   </button>
                 </form>
               ) : (
