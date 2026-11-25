@@ -17,6 +17,7 @@
 - Balance-reserved withdrawal requests with atomic staff payout processing
 - Private one-to-one user/Super Admin messaging with unread indicators and realtime updates
 - Private Super Admin-managed Test OTP APK/video delivery and per-account installation completion records
+- Super Admin-authored in-app notifications with private recipient history and optional VAPID-authenticated browser push
 
 ## Configure
 1. Create `.env` from `.env.example` and fill in the Supabase project URL and publishable key.
@@ -43,6 +44,24 @@ Deposit payment proofs use `20261111100000_deposit_payment_proofs.sql` after the
 The Test OTP module uses `20261111110000_test_otp_module.sql` after the deposit payment-proof migration, or the updated `supabase/schema.sql` for a new project. It stores versioned APK/video metadata and per-user/account installation completions in Supabase. Test APKs and instruction videos are uploaded to the existing private `account-documents` bucket with resumable uploads and authenticated signed downloads. Only an active Super Admin can upload or replace assets; employee and user access is read-only. The module records installation completion only and must not collect or forward real SMS OTPs; use a test app with safe test-code verification.
 
 Live Running Accounts uses `20261112001000_live_running_accounts.sql` after the existing migrations. Apply it to existing projects and after `supabase/schema.sql` for new projects. The migration creates owner-scoped account and commission tables, protects management and review actions with RLS and a Super Admin-only RPC, and schedules shared volume updates with Supabase `pg_cron` (which requires a Supabase Postgres version that supports sub-minute schedules). Calculated commissions remain separate from withdrawable balances.
+
+## Push notifications
+
+The notification system uses `20261125070000_push_notification_system.sql` for an existing project. Review and apply this migration manually in the Supabase SQL Editor after the existing portal migrations; it is not applied by the app or build. New projects can use the updated `supabase/schema.sql`. The migration creates notification, recipient, and private subscription tables, grants users access only to their own notification history/read state, and exposes no subscription rows to browser clients.
+
+Deploy the protected Edge Function after applying the SQL:
+
+```sh
+supabase functions deploy push-notifications
+```
+
+The function uses the existing Supabase Edge Function secrets `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY`. Also set these Supabase Function secrets:
+
+- `VAPID_PUBLIC_KEY` — public application-server key returned to authenticated users when enabling browser push.
+- `VAPID_PRIVATE_KEY` — private VAPID key; keep it only in the Supabase Edge Function environment.
+- `VAPID_SUBJECT` — contact URI, for example `mailto:admin@example.com`.
+
+Generate a matching VAPID key pair with a Web Push key generator, then configure the values as Edge Function secrets (for example with `supabase secrets set`). Never put the private key or service-role key in Vercel, `.env`, a `VITE_` variable, or frontend code. Vercel only needs the existing `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` build variables. The service worker is served from `/sw.js`; production must use HTTPS. Users who do not enable browser push still receive in-app notifications.
 
 Active employees can create regular user accounts with an initial password; the password is sent only to the authenticated Edge Function and is never returned in user lists or stored in the profiles table. Share initial passwords with users through a secure channel. Regular users remain pending until approved. Only an active super admin can create employee accounts; employee accounts are activated on creation. All employee notes are stored separately and are available only through the protected Edge Function.
 
